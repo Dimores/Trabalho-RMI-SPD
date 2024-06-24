@@ -1,6 +1,6 @@
-============
+
 ATIVIDADE AVALIATIVA
-============
+
 Em Salvador (BA), existe um museu interativo chamado Cidade da Música da Bahia. Nele as pessoas podem interagir com as exposições, disparando a exibição de documentários, gravações, clipes e outros pelo próprio celular.
 https://www.instagram.com/cidadedamusicadabahia/
 https://www.salvadordabahia.com/cidade-da-musica-da-bahia/
