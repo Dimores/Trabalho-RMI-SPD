@@ -8,8 +8,9 @@ class VideoServer:
     def __init__(self):
         self.current_video = None
         self.playing = False
+        self.paused = False
         self.lock = threading.Lock()
-        self.pause_condition = threading.Condition(self.lock)
+        self.thread = None
         self.client_id = None
 
     def play_video(self, video_path, client_id):
@@ -19,6 +20,7 @@ class VideoServer:
             
             self.current_video = video_path
             self.playing = True
+            self.paused = False
             self.client_id = client_id
             self.thread = threading.Thread(target=self._play_video_thread)
             self.thread.start()
@@ -27,34 +29,35 @@ class VideoServer:
     def _play_video_thread(self):
         cap = cv2.VideoCapture(self.current_video)
         
-        while True:
-            with self.pause_condition:
-                while not self.playing:
-                    self.pause_condition.wait()
-                if self.current_video is None:
-                    break
-
+        while self.playing and cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
             cv2.imshow('Video', frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
-                continue
+                break
+
+            while self.paused:
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    break
         
         cap.release()
         cv2.destroyAllWindows()
         with self.lock:
             self.current_video = None
             self.playing = False
+            self.paused = False
             self.client_id = None
 
     def pause_video(self, client_id):
         with self.lock:
             if self.client_id != client_id:
                 return "You are not authorized to pause this video"
-            if self.playing:
-                self.playing = False
+            if self.playing and not self.paused:
+                self.paused = True
                 return "Video paused"
+            elif self.paused:
+                return "Video is already paused"
             else:
                 return "No video is playing"
 
@@ -62,9 +65,8 @@ class VideoServer:
         with self.lock:
             if self.client_id != client_id:
                 return "You are not authorized to resume this video"
-            if self.current_video is not None and not self.playing:
-                self.playing = True
-                self.pause_condition.notify()
+            if self.current_video is not None and self.paused:
+                self.paused = False
                 return "Video resumed"
             else:
                 return "No video to resume"
@@ -77,7 +79,6 @@ class VideoServer:
                 self.playing = False
                 self.current_video = None
                 self.client_id = None
-                self.pause_condition.notify()
                 return "Video stopped"
             else:
                 return "No video to stop"

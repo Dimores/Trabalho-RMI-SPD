@@ -10,7 +10,7 @@ def main():
         command = input("Enter command: ").strip().lower()
         
         if command == "play":
-            video_path = input("Enter video path: ").strip()
+            video_path = "C:\\Users\\diego\\OneDrive\\Documentos\\SPD\\Trabalho 2\\videos\\BM.mp4"
             response = video_server.play_video(video_path, client_id)
             print(response)
         elif command == "pause":
