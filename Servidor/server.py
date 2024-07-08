@@ -76,7 +76,7 @@ class VideoServer:
             video.play()
             self.playing = True
 
-            return "Video started playing = {self.playing}"
+            return "Video started playing"
 
     def pause_video(self):
         with self.lock:
